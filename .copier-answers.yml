@@ -1,0 +1,18 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v1.1.0
+_src_path: https://github.com/napari/napari-plugin-template
+display_name: Starfile
+email: github@moritzwm.de
+full_name: MoritzWM
+github_repository_url: provide later
+github_username_or_organization: Chlanda-Lab
+include_reader_plugin: true
+include_sample_data_plugin: true
+include_widget_plugin: true
+include_writer_plugin: true
+install_dependabot: false
+install_precommit: true
+license: BSD-3
+module_name: napari_starfile
+plugin_name: napari-starfile
+short_description: A plugin to open relion star files with napari
