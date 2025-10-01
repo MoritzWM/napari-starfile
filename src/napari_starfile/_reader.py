@@ -35,12 +35,14 @@ def read_stars(path: Union[str, List[str]]):
             raise ValueError(f"No particles in star file {path}")
         assert isinstance(particles, pd.DataFrame)
         coords = particles[[f"rlnCoordinate{zyx}" for zyx in "ZYX"]].to_numpy()
-        shifts = particles[[f"rlnOrigin{zyx}Angst" for zyx in "ZYX"]].to_numpy()
-        apix = particles["rlnPixelSize"].to_numpy()
-        shifts_px = shifts/apix[:, None]
+        shift_columns = [f"rlnOrigin{zyx}Angst" for zyx in "ZYX"]
+        if all(col in particles.columns for col in shift_columns):
+            shifts = particles[shift_columns].to_numpy()
+            apix = particles["rlnPixelSize"].to_numpy()
+            coords -= shifts/apix[:, None]
         angles = np.deg2rad(particles[["rlnAngleRot", "rlnAngleTilt", "rlnAnglePsi"]].to_numpy())
         rot_matrices = np.linalg.inv(utils.euler2matrix(angles, False))
-        layers.append((coords - shifts_px, {"properties": particles}, "points"))
+        layers.append((coords, {"properties": particles}, "points"))
         # Axis vectors
         vecs_z = np.empty((len(coords), 2, 3), dtype=float)
         vecs_z[:, 0] = coords
