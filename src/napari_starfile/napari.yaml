@@ -9,49 +9,25 @@ contributions:
     - id: napari-starfile.get_reader
       python_name: napari_starfile._reader:napari_get_reader
       title: Open data with Starfile
-    - id: napari-starfile.write_multiple
-      python_name: napari_starfile._writer:write_multiple
-      title: Save multi-layer data with Starfile
-    - id: napari-starfile.write_single_image
-      python_name: napari_starfile._writer:write_single_image
-      title: Save image data with Starfile
-    - id: napari-starfile.make_sample_data
-      python_name: napari_starfile._sample_data:make_sample_data
-      title: Load sample data from Starfile
-    - id: napari-starfile.make_container_widget
-      python_name: napari_starfile:ImageThreshold
-      title: Make threshold Container widget
-    - id: napari-starfile.make_magic_widget
-      python_name: napari_starfile:threshold_magic_widget
-      title: Make threshold magic widget
-    - id: napari-starfile.make_function_widget
-      python_name: napari_starfile:threshold_autogenerate_widget
-      title: Make threshold function widget
-    - id: napari-starfile.make_qwidget
-      python_name: napari_starfile:ExampleQWidget
-      title: Make example QWidget
+    - id: napari-starfile.write_starfile
+      python_name: napari_starfile._writer:write_starfile
+      title: Save starfile
+    - id: napari-starfile.SubsetSelectorWidget
+      python_name: napari_starfile:SubsetSelectorWidget
+      title: Subset selector widget
   readers:
     - command: napari-starfile.get_reader
       accepts_directories: false
       filename_patterns: ['*.star']
   writers:
-    - command: napari-starfile.write_multiple
-      layer_types: ['image*','labels*']
-      filename_extensions: []
-    - command: napari-starfile.write_single_image
-      layer_types: ['image']
-      filename_extensions: ['.npy']
+    - command: napari-starfile.write_starfile
+      layer_types: ['points']
+      filename_extensions: ['.star']
   sample_data:
     - command: napari-starfile.make_sample_data
       display_name: Starfile
       key: unique_id.1
   widgets:
-    - command: napari-starfile.make_container_widget
-      display_name: Container Threshold
-    - command: napari-starfile.make_magic_widget
-      display_name: Magic Threshold
-    - command: napari-starfile.make_function_widget
-      autogenerate: true
-      display_name: Autogenerate Threshold
-    - command: napari-starfile.make_qwidget
+    - command: napari-starfile.SubsetSelectorWidget
+      display_name: Subset selector
       display_name: Example QWidget
