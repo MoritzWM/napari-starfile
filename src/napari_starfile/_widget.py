@@ -76,7 +76,7 @@ class FilterWidget(Container):
         if values.dtype in (int, "O"):
             self.cb_discrete_filter.visible = True
             self.rs_float_filter.visible = False
-            self.cb_discrete_filter.choices = list(np.unique(values, sorted=True))
+            self.cb_discrete_filter.choices = sorted(np.unique(values))
         elif values.dtype == float:
             self.cb_discrete_filter.visible = False
             self.rs_float_filter.visible = True
