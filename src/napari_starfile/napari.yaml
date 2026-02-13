@@ -15,6 +15,9 @@ contributions:
     - id: napari-starfile.SubsetSelectorWidget
       python_name: napari_starfile:SubsetSelectorWidget
       title: Subset selector widget
+    - id: napari-starfile.make_sample_data
+      python_name: napari_starfile:make_sample_data
+      title: Load example starfile data
   readers:
     - command: napari-starfile.get_reader
       accepts_directories: false
@@ -30,4 +33,3 @@ contributions:
   widgets:
     - command: napari-starfile.SubsetSelectorWidget
       display_name: Subset selector
-      display_name: Example QWidget
