@@ -26,10 +26,16 @@ def read_paths(paths: str | list[str]) -> list:
 def read_star(star: dict[str, pd.DataFrame] | pd.DataFrame) -> list:
     if isinstance(star, pd.DataFrame):
         star = {"particles": star}
-    if "particles" in star and "optics" in star:
+    if "particles" in star:
+        particles = star["particles"]
+    elif "particles" in star:
+        particles = star[""]
+    else:
+        raise ValueError("No particles in star file")
+    if "optics" in star:
         try:
             particles = pd.merge(
-                star["particles"],
+                particles,
                 star["optics"],
                 how="left",
                 left_on="rlnOpticsGroup",
@@ -40,10 +46,6 @@ def read_star(star: dict[str, pd.DataFrame] | pd.DataFrame) -> list:
             raise ValueError(
                 "Error: could not merge particles and optics"
             ) from err
-    elif "" in star:
-        particles = star[""]
-    else:
-        raise ValueError("No particles in star file")
     coords = (
         particles[[f"rlnCoordinate{zyx}" for zyx in "ZYX"]]
         .to_numpy()
@@ -66,5 +68,15 @@ def read_star(star: dict[str, pd.DataFrame] | pd.DataFrame) -> list:
     vecs_z = np.empty((len(coords), 2, 3), dtype=float)
     vecs_z[:, 0] = coords
     vecs_z[:, 1] = rotations.apply([0, 0, 1])[:, ::-1]
-    return [(vecs_z, {"name": "Z vectors", "edge_color": "blue"}, "vectors")]
+    return [
+        (
+            vecs_z,
+            {
+                "name": "Z vectors",
+                "vector_style": "arrow",
+                "properties": particles,
+            },
+            "vectors",
+        )
+    ]
     # return [(coords, {"properties": particles}, "points")]
