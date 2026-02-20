@@ -1,0 +1,10 @@
+[
+  {
+    "label": "Debug napari",
+    "adapter": "Debugpy",
+    "module": "napari",
+    "request": "launch",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "args": ["src/napari_starfile/data/example_particles.star"],
+  },
+]
