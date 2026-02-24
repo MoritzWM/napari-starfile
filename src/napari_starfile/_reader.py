@@ -28,20 +28,6 @@ def read_stars(paths: str | list[str] | Path | list[Path]) -> list:
         else:
             raise ValueError("No particles in star file")
         assert isinstance(particles, pd.DataFrame)
-        if "optics" in star:
-            try:
-                particles = pd.merge(
-                    particles,
-                    star["optics"],
-                    how="left",
-                    left_on="rlnOpticsGroup",
-                    right_on="rlnOpticsGroup",
-                    validate="many_to_one",
-                )
-            except pd.errors.MergeError as err:
-                raise ValueError(
-                    "Error: could not merge particles and optics"
-                ) from err
         coords = (
             particles[[f"rlnCoordinate{zyx}" for zyx in "ZYX"]]
             .to_numpy()
@@ -67,7 +53,10 @@ def read_stars(paths: str | list[str] | Path | list[Path]) -> list:
         vecs = np.empty((len(coords), 2, 3), dtype=float)
         vecs[:, 0] = coords
         vecs[:, 1] = rotations.apply([0, 0, 1])[:, ::-1]
+        extra_kwargs = {"name": path.stem, "edge_color": "blue", "features": particles}
+        if "optics" in star:
+            extra_kwargs["metadata"] = {"optics": star["optics"]}
         layers.append(
-            (vecs, {"name": path.stem, "edge_color": "blue", "features": particles}, "vectors")
+            (vecs, extra_kwargs, "vectors")
         )
     return layers
