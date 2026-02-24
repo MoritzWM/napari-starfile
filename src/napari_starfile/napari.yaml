@@ -11,13 +11,13 @@ contributions:
       title: Open data with Starfile
     - id: napari-starfile.write_star_relion3
       python_name: napari_starfile._writer:write_star_relion3
-      title: Save Relion 3 starfile
+      title: Save as Relion 3.0 starfile
     - id: napari-starfile.write_star_relion31
       python_name: napari_starfile._writer:write_star_relion31
-      title: Save Relion 3.1 starfile
-    - id: napari-starfile.write_star_relion5
-      python_name: napari_starfile._writer:write_star_relion5
-      title: Save Relion 5 starfile
+      title: Save as Relion 3.1 starfile
+    # - id: napari-starfile.write_star_relion5
+      # python_name: napari_starfile._writer:write_star_relion5
+      # title: Save as Relion 5 starfile
     - id: napari-starfile.SubsetSelectorWidget
       python_name: napari_starfile:SubsetSelectorWidget
       title: Subset selector widget
@@ -30,14 +30,17 @@ contributions:
       filename_patterns: ["*.star"]
   writers:
     - command: napari-starfile.write_star_relion3
-      layer_types: ["vectors"]
+      layer_types: ["vectors+"]
       filename_extensions: [".star"]
+      display_name: Save as Relion 3.0 starfile
     - command: napari-starfile.write_star_relion31
-      layer_types: ["vectors"]
+      layer_types: ["vectors+"]
       filename_extensions: [".star"]
-    - command: napari-starfile.write_star_relion5
-      layer_types: ["vectors"]
-      filename_extensions: [".star"]
+      display_name: Save as Relion 3.1 starfile
+    # - command: napari-starfile.write_star_relion5
+      # layer_types: ["vectors+"]
+      # filename_extensions: [".star"]
+      # display_name: Save as Relion 5 starfile
   sample_data:
     - command: napari-starfile.make_sample_data
       display_name: Starfile
