@@ -68,6 +68,6 @@ def read_stars(paths: str | list[str] | Path | list[Path]) -> list:
         vecs[:, 0] = coords
         vecs[:, 1] = rotations.apply([0, 0, 1])[:, ::-1]
         layers.append(
-            (vecs, {"name": path.stem, "edge_color": "blue"}, "vectors")
+            (vecs, {"name": path.stem, "edge_color": "blue", "features": particles}, "vectors")
         )
     return layers
