@@ -6,6 +6,8 @@ import pandas as pd
 import starfile
 from scipy.spatial.transform import Rotation
 
+from napari_starfile import utils
+
 
 def napari_get_reader(path: str | list[str]):
     if isinstance(path, str):
@@ -28,31 +30,7 @@ def read_stars(paths: str | list[str] | Path | list[Path]) -> list:
         else:
             raise ValueError("No particles in star file")
         assert isinstance(particles, pd.DataFrame)
-        coords = (
-            particles[[f"rlnCoordinate{zyx}" for zyx in "ZYX"]]
-            .to_numpy()
-            .astype(float)
-        )
-        shift_columns = [f"rlnOrigin{zyx}Angst" for zyx in "ZYX"]
-        if all(col in particles.columns for col in shift_columns):
-            warnings.warn(
-                "rlnOriginX/Y/ZAngst is not supported yet, ignoring",
-                stacklevel=2,
-            )
-            # shifts = particles[shift_columns].to_numpy().astype(float)
-            # apix = particles["rlnPixelSize"].to_numpy().astype(float)
-            # coords -= shifts/apix[:, None]
-            #
-        rotations = Rotation.from_euler(
-            "ZYZ",
-            particles[
-                ["rlnAngleRot", "rlnAngleTilt", "rlnAnglePsi"]
-            ].to_numpy(),
-            degrees=True,
-        ).inv()
-        vecs = np.empty((len(coords), 2, 3), dtype=float)
-        vecs[:, 0] = coords
-        vecs[:, 1] = rotations.apply([0, 0, 1])[:, ::-1]
+        vecs = utils.particles2vecs(particles)
         extra_kwargs = {"name": path.stem, "edge_color": "blue", "features": particles}
         if "optics" in star:
             extra_kwargs["metadata"] = {"optics": star["optics"]}

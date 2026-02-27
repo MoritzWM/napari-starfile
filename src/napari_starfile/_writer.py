@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 import starfile
 
+from napari_starfile import utils
 from napari_starfile.utils import vec2euler
 
 if TYPE_CHECKING:
@@ -23,63 +24,29 @@ if TYPE_CHECKING:
     FullLayerData = tuple[DataType, dict, str]
 
 
-def _layers_to_df(
-    data: list["FullLayerData"], layer_column_name: str
-) -> pd.DataFrame:
-    """Turn a list of FullLayerData of vectors into a DataFrame with particle
-    coordinates.
-    """
-    dfs = []
-    for layer_data, meta, _layer_type in data:
-        angles = np.rad2deg(vec2euler(layer_data[:, 1, :], True))
-        df = pd.DataFrame(
-            data={
-                "rlnCoordinateX": layer_data[:, 0, 2],
-                "rlnCoordinateY": layer_data[:, 0, 1],
-                "rlnCoordinateZ": layer_data[:, 0, 0],
-                "rlnAngleRot": angles[:, 0],
-                "rlnAngleTilt": angles[:, 1],
-                "rlnAnglePsi": angles[:, 2],
-                layer_column_name: meta["name"].replace(" ", "_"),
-            }
-        )
-        dfs.append(df)
-        coords = (
-            particles[[f"rlnCoordinate{zyx}" for zyx in "ZYX"]]
-            .to_numpy()
-            .astype(float)
-        )
-        shift_columns = [f"rlnOrigin{zyx}Angst" for zyx in "ZYX"]
-        if all(col in particles.columns for col in shift_columns):
-            warnings.warn("rlnOriginX/Y/ZAngst is not supported yet, ignoring")
-            # shifts = particles[shift_columns].to_numpy().astype(float)
-            # apix = particles["rlnPixelSize"].to_numpy().astype(float)
-            # coords -= shifts/apix[:, None]
-        rotations = Rotation.from_euler(
-            "ZYZ",
-            particles[
-                ["rlnAngleRot", "rlnAngleTilt", "rlnAnglePsi"]
-            ].to_numpy(),
-            degrees=True,
-        ).inv()
-    return pd.concat(dfs)
-
-def _verify_table(df: pd.DataFrame):
-        required_columns = [f"rlnCoordinate{zyx}" for zyx in "ZYX"] + [f"rlnAngle{angle}" for angle in ["Rot", "Tilt", "Psi"]]
-        missing_columns = [col for col in required_columns if col not in df.columns]
-        if missing_columns:
-            raise ValueError(f"Missing required columns: {', '.join(missing_columns)}")
+def layer2particles(layer_data: DataType, layer_meta: dict, layer_type: str) -> pd.DataFrame:
+    if layer_type != "vectors":
+        raise ValueError(f"Unsupported layer type: {layer_type}")
+    particles = layer_meta["features"]
+    if not isinstance(particles, pd.DataFrame):
+        raise ValueError("Layer features must be a DataFrame")
+    # Check if the layer has a particles table already
+    if len(particles) == 0:
+        particles = utils.vecs2particles(layer_data)
+    # Can't check coordinates yet because rlnOriginX/Y/ZAngst is not supported yet, but we can check for angles
+    if not all(col in particles.columns for col in [f"rlnCoordinate{zyx}" for zyx in "ZYX"]):
+        raise ValueError("Particles DataFrame must contain rlnCoordinateX/Y/Z columns")
+    if not all(col in particles.columns for col in [f"rlnAngle{angle}" for angle in ["Rot", "Tilt", "Psi"]]):
+        raise ValueError("Particles DataFrame must contain rlnAngleRot/Tilt/Psi columns")
+    particles["rlnMicrographName"] = layer_meta["name"].replace(" ", "_")
+    return particles
 
 def write_star_relion3(path: str, data: list["FullLayerData"]) -> list[str]:
     if not path.endswith(".star"):
         path += ".star"
     all_particles: list[pd.DataFrame] = []
     for layer_data, layer_meta, layer_type in data:
-        if layer_type != "vectors":
-            raise ValueError(f"Unsupported layer type: {layer_type}")
-        particles = layer_meta["features"]
-        _verify_table(particles)
-        particles["rlnMicrographName"] = layer_meta["name"].replace(" ", "_")
+        particles = layer2particles(layer_data, layer_meta, layer_type)
         if "optics" in layer_meta["metadata"]:
             try:
                 particles = pd.merge(
@@ -106,11 +73,7 @@ def write_star_relion31(path: str, data: list["FullLayerData"]) -> list[str]:
     all_particles: list[pd.DataFrame] = []
     all_optics: list[pd.DataFrame] | pd.DataFrame = []
     for layer_data, layer_meta, layer_type in data:
-        if layer_type != "vectors":
-            raise ValueError(f"Unsupported layer type: {layer_type}")
-        particles = layer_meta["features"]
-        _verify_table(particles)
-        particles["rlnMicrographName"] = layer_meta["name"].replace(" ", "_")
+        particles = layer2particles(layer_data, layer_meta, layer_type)
         if "optics" in layer_meta["metadata"]:
             all_optics.append(layer_meta["metadata"]["optics"])
         all_particles.append(particles)
