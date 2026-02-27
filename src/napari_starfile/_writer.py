@@ -17,14 +17,13 @@ import pandas as pd
 import starfile
 
 from napari_starfile import utils
-from napari_starfile.utils import vec2euler
 
 if TYPE_CHECKING:
     DataType = Any | Sequence[Any]
     FullLayerData = tuple[DataType, dict, str]
 
 
-def layer2particles(layer_data: DataType, layer_meta: dict, layer_type: str) -> pd.DataFrame:
+def layer2particles(layer_data: "DataType", layer_meta: dict, layer_type: str) -> pd.DataFrame:
     if layer_type != "vectors":
         raise ValueError(f"Unsupported layer type: {layer_type}")
     particles = layer_meta["features"]
