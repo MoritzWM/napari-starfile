@@ -71,11 +71,12 @@ def write_star_relion31(path: str, data: list["FullLayerData"]) -> list[str]:
         if "optics" in layer_meta["metadata"]:
             all_optics.append(layer_meta["metadata"]["optics"])
         all_particles.append(particles)
-    particles = pd.concat(all_particles, ignore_index=True, join="inner")
+    star_data = {"particles": pd.concat(all_particles, ignore_index=True, join="inner")}
     if len(all_optics) > 1:
         warnings.warn("Joining optics tables from different layers. Make sure they are all the same!", stacklevel=2)
-    optics = pd.concat(all_optics, join="inner").drop_duplicates().reset_index(drop=True)
-    starfile.write({"optics": optics, "particles": particles}, Path(path), overwrite=True)
+    if len(all_optics) > 0:
+        star_data["optics"] = pd.concat(all_optics, join="inner").drop_duplicates().reset_index(drop=True)
+    starfile.write(star_data, Path(path), overwrite=True)
     return [path]
 
 def write_star_relion5(path: str, data: list["FullLayerData"]) -> list[str]:
