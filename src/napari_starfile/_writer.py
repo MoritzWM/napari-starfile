@@ -57,7 +57,7 @@ def write_star_relion3(path: str, data: list["FullLayerData"]) -> list[str]:
                 ) from err
         all_particles.append(particles)
     particles = pd.concat(all_particles, ignore_index=True, join="inner")
-    starfile.write(all_particles, Path(path), overwrite=True)
+    starfile.write(particles, Path(path), overwrite=True)
     return [path]
 
 
