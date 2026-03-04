@@ -30,13 +30,8 @@ def layer2particles(layer_data: "DataType", layer_meta: dict, layer_type: str) -
     if not isinstance(particles, pd.DataFrame):
         raise ValueError("Layer features must be a DataFrame")
     # Check if the layer has a particles table already
-    if len(particles) == 0:
+    if not all(col in particles.columns for col in [f"rlnCoordinate{zyx}" for zyx in "ZYX"] + [f"rlnAngle{angle}" for angle in ["Rot", "Tilt", "Psi"]]):
         particles = utils.vecs2particles(layer_data)
-    # Can't check coordinates yet because rlnOriginX/Y/ZAngst is not supported yet, but we can check for angles
-    if not all(col in particles.columns for col in [f"rlnCoordinate{zyx}" for zyx in "ZYX"]):
-        raise ValueError("Particles DataFrame must contain rlnCoordinateX/Y/Z columns")
-    if not all(col in particles.columns for col in [f"rlnAngle{angle}" for angle in ["Rot", "Tilt", "Psi"]]):
-        raise ValueError("Particles DataFrame must contain rlnAngleRot/Tilt/Psi columns")
     particles["rlnMicrographName"] = layer_meta["name"].replace(" ", "_")
     return particles
 
