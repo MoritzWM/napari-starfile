@@ -3,13 +3,22 @@ import pandas as pd
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-def particles2vecs(particles: pd.DataFrame) -> np.ndarray:
+def particles2vecs(particles: pd.DataFrame, optics: pd.DataFrame | None) -> np.ndarray:
     """Converts a particles DataFrame to an (N, 2, 3) array of coords and vectors.
     Vectors are unit vectors in the direction of the Z axis after rotation, axis order is ZYX."""
     if not all(col in particles.columns for col in [f"rlnCoordinate{zyx}" for zyx in "ZYX"]):
         raise ValueError("Particles DataFrame must contain rlnCoordinateX/Y/Z columns")
     if not all(col in particles.columns for col in [f"rlnAngle{angle}" for angle in ["Rot", "Tilt", "Psi"]]):
         raise ValueError("Particles DataFrame must contain rlnAngleRot/Tilt/Psi columns")
+    if optics is not None:
+        particles = pd.merge(
+            particles,
+            optics,
+            how="left",
+            left_on="rlnOpticsGroup",
+            right_on="rlnOpticsGroup",
+            validate="many_to_one",
+        )
     coords = (
         particles[[f"rlnCoordinate{zyx}" for zyx in "ZYX"]]
         .to_numpy()
@@ -17,15 +26,17 @@ def particles2vecs(particles: pd.DataFrame) -> np.ndarray:
     )
     shift_columns = [f"rlnOrigin{zyx}Angst" for zyx in "ZYX"]
     if all(col in particles.columns for col in shift_columns):
-        warnings.warn(
-            "rlnOriginX/Y/ZAngst is not supported yet, ignoring",
-            stacklevel=2,
-        )
-        # shifts = particles[shift_columns].to_numpy().astype(float)
-        # apix = particles["rlnPixelSize"].to_numpy().astype(float)
-        # coords -= shifts/apix[:, None]
-        #
-    
+        shifts = particles[shift_columns].to_numpy().astype(float)
+        if "rlnPixelSize" in particles.columns:
+            shifts /= particles["rlnPixelSize"].to_numpy().astype(float)[:, None]
+        elif "rlnDetectorPixelSize" in particles.columns:
+            shifts /= particles["rlnDetectorPixelSize"].to_numpy().astype(float)[:, None]
+        elif "rlnImagePixelSize" in particles.columns:
+            shifts /= particles["rlnImagePixelSize"].to_numpy().astype(float)[:, None]
+        else:
+            warnings.warn("No pixel size found in particles or optics, shifts will be ignored")
+            shifts = np.zeros_like(shifts)
+        coords -= shifts
     vecs = np.empty((len(coords), 2, 3), dtype=float)
     vecs[:, 0] = coords
     vecs[:, 1] = euler2vec(particles)

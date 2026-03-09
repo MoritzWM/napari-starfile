@@ -30,10 +30,11 @@ def read_stars(paths: str | list[str] | Path | list[Path]) -> list:
         else:
             raise ValueError("No particles in star file")
         assert isinstance(particles, pd.DataFrame)
-        vecs = utils.particles2vecs(particles)
+        optics = star.get("optics", None)
+        vecs = utils.particles2vecs(particles, optics)
         extra_kwargs = {"name": path.stem, "edge_color": "blue", "features": particles}
-        if "optics" in star:
-            extra_kwargs["metadata"] = {"optics": star["optics"]}
+        if optics is not None:
+            extra_kwargs["metadata"] = {"optics": optics}
         layers.append(
             (vecs, extra_kwargs, "vectors")
         )
