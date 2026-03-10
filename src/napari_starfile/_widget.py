@@ -4,14 +4,16 @@
 """
 from typing import TYPE_CHECKING, List, Optional
 
-from magicgui import magic_factory
 from magicgui.widgets import Container, create_widget, RadioButtons, ComboBox, Select, RangeSlider, PushButton
+from magicgui.tqdm import tqdm
 import numpy as np
+
+from napari_starfile import utils
 
 if TYPE_CHECKING:
     import napari
 
-    
+
 class FilterWidget(Container):
     def __init__(self, parent: "SubsetSelectorWidget"):
         super().__init__()
@@ -83,6 +85,49 @@ class FilterWidget(Container):
             self.rs_float_filter.min = float(np.min(values))
             self.rs_float_filter.max = float(np.max(values))
             self.rs_float_filter.value = (self.rs_float_filter.min, self.rs_float_filter.max)
+
+
+class SplitWidget(Container):
+    def __init__(self, viewer: "napari.viewer.Viewer"):
+        super().__init__()
+        self._viewer = viewer
+        self.cb_layer = create_widget(label="Layer", annotation="napari.layers.Vectors")
+        self.b_update_columns = PushButton(text="Update columns")
+        self.cb_column = ComboBox(label="Column")
+        self.b_split = PushButton(text="Split")
+        # Signals
+        self.cb_layer.changed.connect(self.on_layer_changed)
+        self.b_update_columns.clicked.connect(self.on_layer_changed)
+        self.b_split.clicked.connect(self.on_split_clicked)
+        # Build
+        self.extend([
+            self.cb_layer,
+            self.b_update_columns,
+            self.cb_column,
+            self.b_split,
+        ])
+
+    def on_layer_changed(self):
+        layer: "napari.layer.Vectors | None" = self.cb_layer.value
+        if layer is None:
+            self.cb_column.choices = []
+        else:
+            self.cb_column.choices = list(layer.features.columns)
+
+    def on_split_clicked(self):
+        layer: "napari.layer.Vectors | None" = self.cb_layer.value
+        if layer is None:
+            return
+        column: str | None = self.cb_column.value
+        if column is None or column == "":
+            return
+        optics = layer.metadata.get("optics", None)
+        for value, table in tqdm(layer.features.groupby(column)):
+            vecs = utils.particles2vecs(table, optics)
+            extra_kwargs = {"name": value, "edge_color": "blue", "features": table}
+            if optics is not None:
+                extra_kwargs["metadata"] = {"optics": optics}
+            self._viewer.add_vectors(vecs, **extra_kwargs)
 
 
 class SubsetSelectorWidget(Container):

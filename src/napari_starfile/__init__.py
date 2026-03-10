@@ -6,7 +6,7 @@ except ImportError:
 
 from ._reader import napari_get_reader
 from ._sample_data import make_sample_data
-from ._widget import SubsetSelectorWidget
+from ._widget import SubsetSelectorWidget, SplitWidget
 from ._writer import (
     write_star_relion3,
     write_star_relion5,
@@ -17,6 +17,7 @@ __all__ = (
     "napari_get_reader",
     "make_sample_data",
     "SubsetSelectorWidget",
+    "SplitWidget",
     "write_star_relion3",
     "write_star_relion31",
     "write_star_relion5",
