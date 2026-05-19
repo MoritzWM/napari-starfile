@@ -2,14 +2,16 @@ import warnings
 import pandas as pd
 import numpy as np
 from scipy.spatial.transform import Rotation
+from warnings import warn
 
 def particles2vecs(particles: pd.DataFrame, optics: pd.DataFrame | None) -> np.ndarray:
     """Converts a particles DataFrame to an (N, 2, 3) array of coords and vectors.
     Vectors are unit vectors in the direction of the Z axis after rotation, axis order is ZYX."""
     if not all(col in particles.columns for col in [f"rlnCoordinate{zyx}" for zyx in "ZYX"]):
         raise ValueError("Particles DataFrame must contain rlnCoordinateX/Y/Z columns")
-    if not all(col in particles.columns for col in [f"rlnAngle{angle}" for angle in ["Rot", "Tilt", "Psi"]]):
-        raise ValueError("Particles DataFrame must contain rlnAngleRot/Tilt/Psi columns")
+    has_eulers = all(col in particles.columns for col in [f"rlnAngle{angle}" for angle in ["Rot", "Tilt", "Psi"]])
+    if not has_eulers:
+        warn("Particles DataFrame does not contain rlnAngleRot/Tilt/Psi columns")
     if optics is not None:
         particles = pd.merge(
             particles,
@@ -39,7 +41,10 @@ def particles2vecs(particles: pd.DataFrame, optics: pd.DataFrame | None) -> np.n
         coords -= shifts
     vecs = np.empty((len(coords), 2, 3), dtype=float)
     vecs[:, 0] = coords
-    vecs[:, 1] = euler2vec(particles)
+    if has_eulers:
+        vecs[:, 1, :] = euler2vec(particles)
+    else:
+        vecs[:, 1, :] = [1, 0, 0]
     return vecs
 
 def vecs2particles(vecs: np.ndarray) -> pd.DataFrame:
