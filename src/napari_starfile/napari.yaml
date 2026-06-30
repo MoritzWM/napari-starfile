@@ -18,8 +18,8 @@ contributions:
     # - id: napari-starfile.write_star_relion5
       # python_name: napari_starfile._writer:write_star_relion5
       # title: Save as Relion 5 starfile
-    - id: napari-starfile.SplitWidget
-      python_name: napari_starfile:SplitWidget
+    - id: napari-starfile.split_widget
+      python_name: napari_starfile:split_widget
       title: Split table
     - id: napari-starfile.SubsetSelectorWidget
       python_name: napari_starfile:SubsetSelectorWidget
@@ -51,5 +51,5 @@ contributions:
   widgets:
     - command: napari-starfile.SubsetSelectorWidget
       display_name: Subset selector
-    - command: napari-starfile.SplitWidget
+    - command: napari-starfile.split_widget
       display_name: Split table
