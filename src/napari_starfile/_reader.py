@@ -24,13 +24,13 @@ def read_stars(paths: str | list[str] | Path | list[Path]) -> list:
     for path in paths:
         star = starfile.read(path, always_dict=True)
         if "particles" in star:
-            particles = star["particles"]
+            particles: pd.DataFrame = star["particles"] # type: ignore
         elif "" in star:
-            particles = star[""]
+            particles: pd.DataFrame = star[""] # type: ignore
         else:
             raise ValueError("No particles in star file")
         assert isinstance(particles, pd.DataFrame)
-        optics = star.get("optics", None)
+        optics: pd.DataFrame | None = star.get("optics", None) # type: ignore
         vecs = utils.particles2vecs(particles, optics)
         extra_kwargs = {"name": path.stem, "edge_color": "blue", "features": particles}
         if optics is not None:
