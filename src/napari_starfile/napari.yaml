@@ -21,9 +21,9 @@ contributions:
     - id: napari-starfile.split_widget
       python_name: napari_starfile:split_widget
       title: Split table
-    - id: napari-starfile.SubsetSelectorWidget
-      python_name: napari_starfile:SubsetSelectorWidget
-      title: Subset selector widget
+    - id: napari-starfile.query_widget
+      python_name: napari_starfile:query_widget
+      title: Query widget
     - id: napari-starfile.make_sample_data
       python_name: napari_starfile:make_sample_data
       title: Load example starfile data
@@ -49,7 +49,7 @@ contributions:
       display_name: Starfile
       key: unique_id.1
   widgets:
-    - command: napari-starfile.SubsetSelectorWidget
-      display_name: Subset selector
     - command: napari-starfile.split_widget
       display_name: Split table
+    - command: napari-starfile.query_widget
+      display_name: Query table

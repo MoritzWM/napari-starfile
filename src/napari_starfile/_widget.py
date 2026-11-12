@@ -153,6 +153,21 @@ def split_widget(
         layers.append((vecs, extra_kwargs, "vectors"))
     return layers
 
+@magic_factory()
+def query_widget(layer: "napari.layers.Vectors", query: str # type: ignore
+) -> list["napari.types.LayerDataTuple"]:  # pyright: ignore[reportAttributeAccessIssue]
+    if query == "":
+        return []
+    optics = layer.metadata.get("optics", None)
+    features: pd.DataFrame = layer.features
+    table = features.query(query)
+    vecs = utils.particles2vecs(table, optics)
+    extra_kwargs = {"name": "query_result", "edge_color": "blue", "features": table}
+    if optics is not None:
+        extra_kwargs["metadata"] = {"optics": optics}
+    return [(vecs, extra_kwargs, "vectors")]
+
+    
 
 class SubsetSelectorWidget(Container):
     def __init__(self, viewer: "napari.viewer.Viewer"):  # pyright: ignore[reportAttributeAccessIssue]
