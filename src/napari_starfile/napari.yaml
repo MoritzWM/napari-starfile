@@ -24,6 +24,9 @@ contributions:
     - id: napari-starfile.query_widget
       python_name: napari_starfile:query_widget
       title: Query widget
+    - id: napari-starfile.edit_vectors
+      python_name: napari_starfile:EditVectorsWidget
+      title: Edit vectors
     - id: napari-starfile.make_sample_data
       python_name: napari_starfile:make_sample_data
       title: Load example starfile data
@@ -53,3 +56,5 @@ contributions:
       display_name: Split table
     - command: napari-starfile.query_widget
       display_name: Query table
+    - command: napari-starfile.edit_vectors
+      display_name: Edit vectors

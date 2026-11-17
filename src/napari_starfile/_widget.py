@@ -106,6 +106,7 @@ class FilterWidget(Container):
                 self.rs_float_filter.max,
             )
 
+
 def _first_str_feature(features: "pd.DataFrame") -> str:
     for column in features.columns:
         if pd.api.types.is_string_dtype(features[column].dtype):
@@ -121,6 +122,7 @@ def _split_widget_init(widget):
             return
         widget.column.choices = lambda _: list(layer.features.columns)
         widget.column.value = _first_str_feature(layer.features)
+
     on_layer_changed(widget.layer.value)
 
     @widget.column.changed.connect
@@ -131,15 +133,18 @@ def _split_widget_init(widget):
             return
         n_unique_values = layer.features[column].nunique()
         widget.call_button.text = f"Split into {n_unique_values} layers"
+
     on_column_changed(widget.column.value)
+
 
 @magic_factory(
     widget_init=_split_widget_init,
     column={"widget_type": "ComboBox"},
-    call_button="Split"
+    call_button="Split",
 )
 def split_widget(
-    layer: "napari.layers.Vectors", column: str # type: ignore
+    layer: "napari.layers.Vectors",
+    column: str,  # type: ignore
 ) -> list["napari.types.LayerDataTuple"]:  # pyright: ignore[reportAttributeAccessIssue]
     if column == "":
         return []
@@ -153,8 +158,11 @@ def split_widget(
         layers.append((vecs, extra_kwargs, "vectors"))
     return layers
 
+
 @magic_factory()
-def query_widget(layer: "napari.layers.Vectors", query: str # type: ignore
+def query_widget(
+    layer: "napari.layers.Vectors",
+    query: str,  # type: ignore
 ) -> list["napari.types.LayerDataTuple"]:  # pyright: ignore[reportAttributeAccessIssue]
     if query == "":
         return []
@@ -162,12 +170,15 @@ def query_widget(layer: "napari.layers.Vectors", query: str # type: ignore
     features: pd.DataFrame = layer.features
     table = features.query(query)
     vecs = utils.particles2vecs(table, optics)
-    extra_kwargs = {"name": "query_result", "edge_color": "blue", "features": table}
+    extra_kwargs = {
+        "name": "query_result",
+        "edge_color": "blue",
+        "features": table,
+    }
     if optics is not None:
         extra_kwargs["metadata"] = {"optics": optics}
     return [(vecs, extra_kwargs, "vectors")]
 
-    
 
 class SubsetSelectorWidget(Container):
     def __init__(self, viewer: "napari.viewer.Viewer"):  # pyright: ignore[reportAttributeAccessIssue]
